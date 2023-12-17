@@ -182,7 +182,7 @@ class Driver:
         return urls
 
     # Go through jobs & grab info
-    def indeedFilterJobs(self, links):
+    def indeedGetJobInfo(self, links):
         print(f"\nFound {c.YELLOW}{len(links)} JOBS{c.RESET}\n")
         for link in links:
             self.navTo(link)
@@ -235,27 +235,6 @@ class Driver:
             )
         self.waitRandom()
 
-    # Bypass CAPTCHA (not working)
-    def verifyHuman(self, wait):
-        print(f"\n{c.PURPLE}Checking for CAPTCHA{c.RESET}")
-        try:
-            self.waitRandom()
-            WebDriverWait(self.driver, wait).until(
-                EC.frame_to_be_available_and_switch_to_it(
-                    (
-                        By.CSS_SELECTOR,
-                        "#challenge-stage",
-                    )
-                )
-            )
-            WebDriverWait(driver, wait).until(
-                EC.element_to_be_clickable(
-                    (By.CSS_SELECTOR, "#challenge-stage > div > label")
-                )
-            ).click()
-        except:
-            print(f"\n{c.GREEN}CAPTCHA not found{c.RESET}\n")
-
 
 # MAIN
 if __name__ == "__main__":
@@ -266,8 +245,8 @@ if __name__ == "__main__":
         driver.indeedEnterLocation(location)
         driver.indeedClickSearch()
         indeedLinks = driver.indeedGetJobs(pages)
-        driver.indeedFilterJobs(indeedLinks)
+        driver.indeedGetJobInfo(indeedLinks)
 
     driver = Driver()
-    searchIndeed("python entry level", "75081", 2)
+    searchIndeed("python entry level", "75081", 1)
     driver.stayOpen(900, False)
