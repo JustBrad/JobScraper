@@ -33,7 +33,6 @@ class Driver:
 
     # Navigate to specified URL
     def navTo(self, url, wait):
-        print(f"\nNavigating to {url}")
         self.driver.get(url)
         time.sleep(wait)
 
@@ -90,22 +89,61 @@ class Driver:
             url = link.get_attribute("href")
             urls.append(url)
             print("\n" + link.text)
-            print(url)
 
         time.sleep(wait)
         return urls
+
+    def indeedFilterJobs(self, links, wait):
+        print("\n--- Searching for good jobs ---\n")
+        for link in links:
+            self.navTo(link, wait)
+
+            # Print URL
+            print(self.getUrl())
+            try:
+                titleContainer = self.driver.find_element(
+                    By.CLASS_NAME, "jobsearch-JobInfoHeader-title"
+                )
+                title = titleContainer.find_element(By.TAG_NAME, "span")
+                print(title.text)
+            except:
+                print("No title provided")
+
+            # Get salary info
+            try:
+                salaryArea = self.driver.find_element(By.ID, "salaryInfoAndJobType")
+                salaryInfo = salaryArea.find_elements(By.TAG_NAME, "span")
+                for info in salaryInfo:
+                    if info.text[0] == "-":
+                        print(info.text[2::])
+                    else:
+                        print(info.text)
+            except:
+                print("No salary provided")
+
+            # Get job rating
+            try:
+                jobRating = self.driver.find_element(By.ID, "companyRatings")
+                rating = jobRating.get_attribute("aria-label")
+                print(rating)
+            except:
+                print("No rating provided")
+
+            print(f"Jobs explored ({links.index(link) + 1}/{len(links)})\n")
+        time.sleep(wait)
 
 
 # MAIN
 if __name__ == "__main__":
     # Search Indeed
-    def searchIndeed():
-        driver.navTo("https://www.indeed.com/", 3)
-        driver.indeedEnterKeywords("Entry level Python", 3)
-        driver.indeedEnterLocation("75081", 3)
-        driver.indeedClickSearch(3)
-        indeedJobLinks = driver.indeedGetJobs(3)
-        driver.stayOpen(900, False)
+    def searchIndeed(wait):
+        driver.navTo("https://www.indeed.com/", wait)
+        driver.indeedEnterKeywords("Entry level Python", wait)
+        driver.indeedEnterLocation("75081", wait)
+        driver.indeedClickSearch(wait)
+        indeedLinks = driver.indeedGetJobs(wait)
+        driver.indeedFilterJobs(indeedLinks, wait)
 
     driver = Driver()
-    searchIndeed()
+    searchIndeed(2)
+    driver.stayOpen(900, False)
