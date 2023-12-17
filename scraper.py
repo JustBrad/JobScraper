@@ -10,6 +10,7 @@ from ColorCodes import Colors as c
 import keyboard
 import os
 import time
+import random
 
 
 # DRIVER
@@ -19,8 +20,17 @@ class Driver:
         PATH = "C:\chromedriver.exe"
         OPTIONS = webdriver.ChromeOptions()
         OPTIONS.add_experimental_option("detach", True)
-        self.driver = webdriver.Chrome(PATH)
+        OPTIONS.add_experimental_option("excludeSwitches", ["enable-automation"])
+        OPTIONS.add_experimental_option("useAutomationExtension", False)
+        OPTIONS.add_argument("--disable-blink-features=AutomationControlled")
+        self.driver = webdriver.Chrome(PATH, options=OPTIONS)
         print(f"+ \n--- Starting WebDriver with Selenium {selenium.__version__} ---")
+
+    # Wait random number of seconds
+    def waitRandom(self):
+        sleep = random.randint(3, 8)
+        print(f"\n{c.BLUE}Waiting {sleep} seconds...{c.RESET}")
+        time.sleep(sleep)
 
     # Stay open for number of seconds
     def stayOpen(self, seconds, countdown):
@@ -35,21 +45,21 @@ class Driver:
         quit()
 
     # Navigate to specified URL
-    def navTo(self, url, wait):
+    def navTo(self, url):
         self.driver.get(url)
-        time.sleep(wait)
+        self.waitRandom()
 
     # Refresh page & wait for number of seconds
-    def refresh(self, wait):
+    def refresh(self):
         print("\nRefreshing page")
         self.driver.refresh()
-        time.sleep(wait)
+        self.waitRandom()
 
     # Go back one page & wait for number of seconds
-    def back(self, wait):
+    def back(self):
         print("\nGoing back one page")
         self.driver.back()
-        time.sleep(wait)
+        self.waitRandom()
 
     # Returns current URL
     def getUrl(self):
@@ -60,22 +70,22 @@ class Driver:
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
     # Enter keywords
-    def indeedEnterKeywords(self, keywords, wait):
+    def indeedEnterKeywords(self, keywords):
         print(f"\nEntering keywords: {c.YELLOW}{keywords}{c.RESET}")
         keywordBox = self.driver.find_element(By.ID, "text-input-what")
         keywordBox.send_keys(keywords)
-        time.sleep(wait)
+        self.waitRandom()
 
     # Enter location
-    def indeedEnterLocation(self, location, wait):
+    def indeedEnterLocation(self, location):
         print(f"\nEntering location: {c.YELLOW}{location}{c.RESET}")
         locationBox = self.driver.find_element(By.ID, "text-input-where")
         locationBox.send_keys(Keys.CONTROL + "a", Keys.BACKSPACE)
         locationBox.send_keys(location)
-        time.sleep(wait)
+        self.waitRandom()
 
     # Filter by experience level | 0=none | 1=entry | 2=mid | 3=senior |
-    def indeedFilterExperience(self, experience, wait):
+    def indeedFilterExperience(self, experience):
         if experience == 0:
             xpString = "NO EXPERIENCE"
         elif experience == 1:
@@ -126,25 +136,26 @@ class Driver:
         except:
             print(c.RED + f"\nFailed to click {xpString} option" + c.RESET)
 
-        time.sleep(wait)
+        self.waitRandom()
 
     # Click search
-    def indeedClickSearch(self, wait):
+    def indeedClickSearch(self):
         print(f"\nClicking {c.YELLOW}SEARCH{c.RESET}")
         searchButton = self.driver.find_element(
             By.CLASS_NAME, "yosegi-InlineWhatWhere-primaryButton"
         )
         searchButton.click()
-        time.sleep(wait)
+        self.waitRandom()
 
     # Get jobs on page
-    def indeedGetJobs(self, pages, wait):
+    def indeedGetJobs(self, pages):
         urls = []
         pagesToSearch = pages
 
         while pagesToSearch > 0:
             # Grab job posts
-            time.sleep(wait)
+            print(f"\nGoing to {c.YELLOW}NEXT PAGE{c.RESET}")
+            self.waitRandom()
             print(f"\nLooking for {c.YELLOW}JOBS{c.RESET}")
             self.scrollDown()
             jobs = self.driver.find_elements(By.CLASS_NAME, "job_seen_beacon")
@@ -163,19 +174,18 @@ class Driver:
                     aElement = liElement.find_element(By.TAG_NAME, "a")
                     if aElement.get_attribute("data-testid") == "pagination-page-next":
                         nextPageButton = aElement
-                        print(f"\nGoing to {c.YELLOW}NEXT PAGE{c.RESET}")
                         nextPageButton.click()
                         time.sleep(5)
             pagesToSearch -= 1
 
-        time.sleep(wait)
+        self.waitRandom()
         return urls
 
     # Go through jobs & grab info
-    def indeedFilterJobs(self, links, wait):
+    def indeedFilterJobs(self, links):
         print(f"\nFound {c.YELLOW}{len(links)} JOBS{c.RESET}\n")
         for link in links:
-            self.navTo(link, wait)
+            self.navTo(link)
 
             # Print URL
             print(c.UNDERLINE + c.DKGRAY + self.getUrl() + c.RESET)
@@ -223,13 +233,13 @@ class Driver:
             print(
                 f"{c.DKGRAY}Jobs explored ({links.index(link) + 1}/{len(links)})\n{c.RESET}"
             )
-        time.sleep(wait)
+        self.waitRandom()
 
     # Bypass CAPTCHA (not working)
     def verifyHuman(self, wait):
         print(f"\n{c.PURPLE}Checking for CAPTCHA{c.RESET}")
         try:
-            time.sleep(wait)
+            self.waitRandom()
             WebDriverWait(self.driver, wait).until(
                 EC.frame_to_be_available_and_switch_to_it(
                     (
@@ -250,14 +260,14 @@ class Driver:
 # MAIN
 if __name__ == "__main__":
     # Search Indeed
-    def searchIndeed(keywords, location, pages, wait):
-        driver.navTo("https://www.indeed.com/", wait)
-        driver.indeedEnterKeywords(keywords, wait)
-        driver.indeedEnterLocation(location, wait)
-        driver.indeedClickSearch(wait)
-        indeedLinks = driver.indeedGetJobs(pages, wait)
-        driver.indeedFilterJobs(indeedLinks, wait)
+    def searchIndeed(keywords, location, pages):
+        driver.navTo("https://www.indeed.com/")
+        driver.indeedEnterKeywords(keywords)
+        driver.indeedEnterLocation(location)
+        driver.indeedClickSearch()
+        indeedLinks = driver.indeedGetJobs(pages)
+        driver.indeedFilterJobs(indeedLinks)
 
     driver = Driver()
-    searchIndeed("python developer", "75081", 2, 2)
+    searchIndeed("python entry level", "75081", 2)
     driver.stayOpen(900, False)
