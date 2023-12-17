@@ -138,22 +138,40 @@ class Driver:
         time.sleep(wait)
 
     # Get jobs on page
-    def indeedGetJobs(self, wait):
+    def indeedGetJobs(self, pages, wait):
         urls = []
-        self.scrollDown()
+        pagesToSearch = pages
 
-        print(f"\nLooking for {c.YELLOW}JOBS{c.RESET}")
-        jobs = self.driver.find_elements(By.CLASS_NAME, "job_seen_beacon")
+        while pagesToSearch > 0:
+            # Grab job posts
+            time.sleep(wait)
+            print(f"\nLooking for {c.YELLOW}JOBS{c.RESET}")
+            self.scrollDown()
+            jobs = self.driver.find_elements(By.CLASS_NAME, "job_seen_beacon")
 
-        for job in jobs:
-            link = job.find_element(By.TAG_NAME, "a")
-            url = link.get_attribute("href")
-            urls.append(url)
-            # print(c.DKGRAY + "\n" + link.text + c.RESET)
+            # Grab job URLs
+            for job in jobs:
+                link = job.find_element(By.TAG_NAME, "a")
+                url = link.get_attribute("href")
+                urls.append(url)
+
+            # Click next page
+            navElements = self.driver.find_elements(By.TAG_NAME, "nav")
+            for navElement in navElements:
+                liElements = navElement.find_elements(By.TAG_NAME, "li")
+                for liElement in liElements:
+                    aElement = liElement.find_element(By.TAG_NAME, "a")
+                    if aElement.get_attribute("data-testid") == "pagination-page-next":
+                        nextPageButton = aElement
+                        print(f"\nGoing to {c.YELLOW}NEXT PAGE{c.RESET}")
+                        nextPageButton.click()
+                        time.sleep(5)
+            pagesToSearch -= 1
 
         time.sleep(wait)
         return urls
 
+    # Go through jobs & grab info
     def indeedFilterJobs(self, links, wait):
         print(f"\nFound {c.YELLOW}{len(links)} JOBS{c.RESET}\n")
         for link in links:
@@ -207,6 +225,7 @@ class Driver:
             )
         time.sleep(wait)
 
+    # Bypass CAPTCHA (not working)
     def verifyHuman(self, wait):
         print(f"\n{c.PURPLE}Checking for CAPTCHA{c.RESET}")
         try:
@@ -231,15 +250,14 @@ class Driver:
 # MAIN
 if __name__ == "__main__":
     # Search Indeed
-    def searchIndeed(keywords, location, wait):
+    def searchIndeed(keywords, location, pages, wait):
         driver.navTo("https://www.indeed.com/", wait)
         driver.indeedEnterKeywords(keywords, wait)
         driver.indeedEnterLocation(location, wait)
         driver.indeedClickSearch(wait)
-        # driver.indeedFilterExperience(1, 5)
-        indeedLinks = driver.indeedGetJobs(wait)
+        indeedLinks = driver.indeedGetJobs(pages, wait)
         driver.indeedFilterJobs(indeedLinks, wait)
 
     driver = Driver()
-    searchIndeed("python developer", "75081", 2)
+    searchIndeed("python developer", "75081", 2, 2)
     driver.stayOpen(900, False)
