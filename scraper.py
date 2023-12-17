@@ -22,11 +22,11 @@ class Driver:
     # Stay open for number of seconds
     def stayOpen(self, seconds, countdown):
         print("\n--- DONE ---")
-        if countdown:
-            while seconds > 0:
+        while seconds > 0:
+            if countdown:
                 print(f"{seconds}")
-                seconds -= 1
-                time.sleep(1)
+            seconds -= 1
+            time.sleep(1)
         print("\nClosing Webdriver...")
         self.driver.quit()
         quit()
@@ -98,13 +98,14 @@ class Driver:
 
 # MAIN
 if __name__ == "__main__":
+    # Search Indeed
+    def searchIndeed():
+        driver.navTo("https://www.indeed.com/", 3)
+        driver.indeedEnterKeywords("Entry level Python", 3)
+        driver.indeedEnterLocation("75081", 3)
+        driver.indeedClickSearch(3)
+        indeedJobLinks = driver.indeedGetJobs(3)
+        driver.stayOpen(900, False)
+
     driver = Driver()
-
-    # Search jobs
-    driver.navTo("https://www.indeed.com/", 3)
-    driver.indeedEnterKeywords("Entry level Python", 3)
-    driver.indeedEnterLocation("75081", 3)
-    driver.indeedClickSearch(3)
-    indeedJobLinks = driver.indeedGetJobs(3)
-
-    driver.stayOpen(900, False)
+    searchIndeed()
