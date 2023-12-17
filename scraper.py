@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from ColorCodes import Colors as c
+import undetected_chromedriver as uc
 import keyboard
 import os
 import time
@@ -18,17 +19,17 @@ class Driver:
     # Initialize
     def __init__(self):
         PATH = "C:\chromedriver.exe"
-        OPTIONS = webdriver.ChromeOptions()
-        OPTIONS.add_experimental_option("detach", True)
-        OPTIONS.add_experimental_option("excludeSwitches", ["enable-automation"])
-        OPTIONS.add_experimental_option("useAutomationExtension", False)
-        OPTIONS.add_argument("--disable-blink-features=AutomationControlled")
-        self.driver = webdriver.Chrome(options=OPTIONS)
+        OPTIONS = uc.ChromeOptions()
+        # OPTIONS.add_experimental_option("detach", True)
+        # OPTIONS.add_experimental_option("excludeSwitches", ["enable-automation"])
+        # OPTIONS.add_experimental_option("useAutomationExtension", False)
+        # OPTIONS.add_argument("--disable-blink-features=AutomationControlled")
+        self.driver = uc.Chrome(use_subprocess=True, options=OPTIONS)
         print(f"+ \n--- Starting WebDriver with Selenium {selenium.__version__} ---")
 
     # Wait random number of seconds
     def waitRandom(self):
-        sleep = random.randint(5, 15)
+        sleep = random.randint(3, 10)
         print(f"\n{c.BLUE}Waiting {sleep} seconds...{c.RESET}")
         time.sleep(sleep)
 
@@ -41,6 +42,7 @@ class Driver:
             seconds -= 1
             time.sleep(1)
         print("\nClosing Webdriver...")
+        self.driver.close()
         self.driver.quit()
         quit()
 
@@ -246,7 +248,7 @@ if __name__ == "__main__":
         driver.indeedClickSearch()
         indeedLinks = driver.indeedGetJobs(pages)
         driver.indeedGetJobInfo(indeedLinks)
+        driver.stayOpen(900, False)
 
     driver = Driver()
     searchIndeed("python entry level", "75081", 1)
-    driver.stayOpen(900, False)
