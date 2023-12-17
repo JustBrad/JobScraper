@@ -53,6 +53,10 @@ class Driver:
     def getUrl(self):
         return self.driver.current_url
 
+    # Scrolls down to bottom of page
+    def scrollDown(self):
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
     # Enter keywords
     def indeedEnterKeywords(self, keywords, wait):
         print(f"\nEntering keywords: {c.YELLOW}{keywords}{c.RESET}")
@@ -68,6 +72,16 @@ class Driver:
         locationBox.send_keys(location)
         time.sleep(wait)
 
+    # Filter no experience
+    def indeedFilterNoExperience(self, wait):
+        print(f"\nFiltering by {c.YELLOW}NO EXPERIENCE{c.RESET}")
+        xpLevel = self.driver.find_element(By.ID, "filter-explvl")
+        xpLevel.click()
+        dropdown = self.driver.find_element(By.ID, "filter-explvl-menu")
+        dropdownOptions = dropdown.find_elements(By.TAG_NAME, "li")
+        dropdownOptions[3].click()
+        time.sleep(wait)
+
     # Click search
     def indeedClickSearch(self, wait):
         print(f"\nClicking {c.YELLOW}SEARCH{c.RESET}")
@@ -80,6 +94,7 @@ class Driver:
     # Get jobs on page
     def indeedGetJobs(self, wait):
         urls = []
+        self.scrollDown()
 
         print(f"\nLooking for {c.YELLOW}JOBS{c.RESET}")
         jobs = self.driver.find_elements(By.CLASS_NAME, "job_seen_beacon")
@@ -159,5 +174,5 @@ if __name__ == "__main__":
         driver.indeedFilterJobs(indeedLinks, wait)
 
     driver = Driver()
-    searchIndeed("Entry level Python", "75081", 2)
+    searchIndeed("java tester", "75081", 2)
     driver.stayOpen(900, False)
