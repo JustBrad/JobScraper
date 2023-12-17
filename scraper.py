@@ -23,12 +23,12 @@ class Driver:
         OPTIONS.add_experimental_option("excludeSwitches", ["enable-automation"])
         OPTIONS.add_experimental_option("useAutomationExtension", False)
         OPTIONS.add_argument("--disable-blink-features=AutomationControlled")
-        self.driver = webdriver.Chrome(PATH, options=OPTIONS)
+        self.driver = webdriver.Chrome(options=OPTIONS)
         print(f"+ \n--- Starting WebDriver with Selenium {selenium.__version__} ---")
 
     # Wait random number of seconds
     def waitRandom(self):
-        sleep = random.randint(3, 8)
+        sleep = random.randint(5, 15)
         print(f"\n{c.BLUE}Waiting {sleep} seconds...{c.RESET}")
         time.sleep(sleep)
 
@@ -154,7 +154,6 @@ class Driver:
 
         while pagesToSearch > 0:
             # Grab job posts
-            print(f"\nGoing to {c.YELLOW}NEXT PAGE{c.RESET}")
             self.waitRandom()
             print(f"\nLooking for {c.YELLOW}JOBS{c.RESET}")
             self.scrollDown()
@@ -174,6 +173,7 @@ class Driver:
                     aElement = liElement.find_element(By.TAG_NAME, "a")
                     if aElement.get_attribute("data-testid") == "pagination-page-next":
                         nextPageButton = aElement
+                        print(f"\nGoing to {c.YELLOW}NEXT PAGE{c.RESET}")
                         nextPageButton.click()
                         time.sleep(5)
             pagesToSearch -= 1
