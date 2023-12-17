@@ -22,7 +22,7 @@ class Driver:
 
     # Stay open for number of seconds
     def stayOpen(self, seconds, countdown):
-        print("\n--- DONE ---")
+        print(f"{c.GREEN}\n--- DONE ---{c.RESET}")
         while seconds > 0:
             if countdown:
                 print(f"{seconds}")
@@ -55,14 +55,14 @@ class Driver:
 
     # Enter keywords
     def indeedEnterKeywords(self, keywords, wait):
-        print(f'\nEntering keywords: "{keywords}"')
+        print(f"\nEntering keywords: {c.YELLOW}{keywords}{c.RESET}")
         keywordBox = self.driver.find_element(By.ID, "text-input-what")
         keywordBox.send_keys(keywords)
         time.sleep(wait)
 
     # Enter location
     def indeedEnterLocation(self, location, wait):
-        print(f'\nEntering location: "{location}"')
+        print(f"\nEntering location: {c.YELLOW}{location}{c.RESET}")
         locationBox = self.driver.find_element(By.ID, "text-input-where")
         locationBox.send_keys(Keys.CONTROL + "a", Keys.BACKSPACE)
         locationBox.send_keys(location)
@@ -70,7 +70,7 @@ class Driver:
 
     # Click search
     def indeedClickSearch(self, wait):
-        print("\nClicking search button")
+        print(f"\nClicking {c.YELLOW}SEARCH{c.RESET}")
         searchButton = self.driver.find_element(
             By.CLASS_NAME, "yosegi-InlineWhatWhere-primaryButton"
         )
@@ -81,26 +81,25 @@ class Driver:
     def indeedGetJobs(self, wait):
         urls = []
 
-        print("\nLooking for jobs")
+        print(f"\nLooking for {c.YELLOW}JOBS{c.RESET}")
         jobs = self.driver.find_elements(By.CLASS_NAME, "job_seen_beacon")
-        print(f"\n--- Found {len(jobs)} jobs ---")
 
         for job in jobs:
             link = job.find_element(By.TAG_NAME, "a")
             url = link.get_attribute("href")
             urls.append(url)
-            print("\n" + link.text)
+            # print(c.DKGRAY + "\n" + link.text + c.RESET)
 
         time.sleep(wait)
         return urls
 
     def indeedFilterJobs(self, links, wait):
-        print("\n--- Searching for good jobs ---\n")
+        print(f"\nFound {c.YELLOW}{len(links)} JOBS{c.RESET}\n")
         for link in links:
             self.navTo(link, wait)
 
             # Print URL
-            print(self.getUrl())
+            print(c.UNDERLINE + c.DKGRAY + self.getUrl() + c.RESET)
 
             # Get job title
             try:
@@ -108,9 +107,9 @@ class Driver:
                     By.CLASS_NAME, "jobsearch-JobInfoHeader-title"
                 )
                 title = titleContainer.find_element(By.TAG_NAME, "span")
-                print(title.text)
+                print(c.YELLOW + title.text + c.RESET)
             except:
-                print("No title provided")
+                print(c.RED + "No title provided" + c.RESET)
 
             # Get job location
             try:
@@ -120,7 +119,7 @@ class Driver:
                 )
                 print(location.text)
             except:
-                print("No location provided")
+                print(c.RED + "No location provided" + c.RESET)
 
             # Get salary info
             try:
@@ -128,11 +127,11 @@ class Driver:
                 salaryInfo = salaryArea.find_elements(By.TAG_NAME, "span")
                 for info in salaryInfo:
                     if info.text[0] == "-":
-                        print(info.text[2::])
+                        print(c.GREEN + info.text[2::] + c.RESET)
                     else:
-                        print(info.text)
+                        print(c.GREEN + info.text + c.RESET)
             except:
-                print("No salary provided")
+                print(c.RED + "No salary provided" + c.RESET)
 
             # Get job rating
             try:
@@ -140,9 +139,11 @@ class Driver:
                 rating = jobRating.get_attribute("aria-label")
                 print(rating)
             except:
-                print("No rating provided")
+                print(c.RED + "No rating provided" + c.RESET)
 
-            print(f"Jobs explored ({links.index(link) + 1}/{len(links)})\n")
+            print(
+                f"{c.DKGRAY}Jobs explored ({links.index(link) + 1}/{len(links)})\n{c.RESET}"
+            )
         time.sleep(wait)
 
 
