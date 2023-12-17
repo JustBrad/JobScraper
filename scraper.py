@@ -4,6 +4,7 @@ import selenium
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from ColorCodes import Colors as c
 import keyboard
 import os
 import time
@@ -17,7 +18,7 @@ class Driver:
         OPTIONS = webdriver.ChromeOptions()
         OPTIONS.add_experimental_option("detach", True)
         self.driver = webdriver.Chrome(PATH)
-        print(f"\n--- Starting WebDriver with Selenium {selenium.__version__} ---")
+        print(f"+ \n--- Starting WebDriver with Selenium {selenium.__version__} ---")
 
     # Stay open for number of seconds
     def stayOpen(self, seconds, countdown):
@@ -100,6 +101,8 @@ class Driver:
 
             # Print URL
             print(self.getUrl())
+
+            # Get job title
             try:
                 titleContainer = self.driver.find_element(
                     By.CLASS_NAME, "jobsearch-JobInfoHeader-title"
@@ -108,6 +111,16 @@ class Driver:
                 print(title.text)
             except:
                 print("No title provided")
+
+            # Get job location
+            try:
+                location = self.driver.find_element(
+                    By.XPATH,
+                    '//*[@id="viewJobSSRRoot"]/div/div[2]/div/div/div[1]/div[2]/div[1]/div[2]/div/div/div/div[2]/div',
+                )
+                print(location.text)
+            except:
+                print("No location provided")
 
             # Get salary info
             try:
@@ -136,14 +149,14 @@ class Driver:
 # MAIN
 if __name__ == "__main__":
     # Search Indeed
-    def searchIndeed(wait):
+    def searchIndeed(keywords, location, wait):
         driver.navTo("https://www.indeed.com/", wait)
-        driver.indeedEnterKeywords("Entry level Python", wait)
-        driver.indeedEnterLocation("75081", wait)
+        driver.indeedEnterKeywords(keywords, wait)
+        driver.indeedEnterLocation(location, wait)
         driver.indeedClickSearch(wait)
         indeedLinks = driver.indeedGetJobs(wait)
         driver.indeedFilterJobs(indeedLinks, wait)
 
     driver = Driver()
-    searchIndeed(2)
+    searchIndeed("Entry level Python", "75081", 2)
     driver.stayOpen(900, False)
