@@ -4,6 +4,8 @@ import selenium
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from ColorCodes import Colors as c
 import keyboard
 import os
@@ -72,14 +74,58 @@ class Driver:
         locationBox.send_keys(location)
         time.sleep(wait)
 
-    # Filter no experience
-    def indeedFilterNoExperience(self, wait):
-        print(f"\nFiltering by {c.YELLOW}NO EXPERIENCE{c.RESET}")
-        xpLevel = self.driver.find_element(By.ID, "filter-explvl")
-        xpLevel.click()
-        dropdown = self.driver.find_element(By.ID, "filter-explvl-menu")
-        dropdownOptions = dropdown.find_elements(By.TAG_NAME, "li")
-        dropdownOptions[3].click()
+    # Filter by experience level | 0=none | 1=entry | 2=mid | 3=senior |
+    def indeedFilterExperience(self, experience, wait):
+        if experience == 0:
+            xpString = "NO EXPERIENCE"
+        elif experience == 1:
+            xpString = "ENTRY LEVEL"
+        elif experience == 2:
+            xpString = "MID LEVEL"
+        elif experience == 3:
+            xpString = "SENIOR LEVEL"
+
+        print(f"\nFiltering by {c.YELLOW}{xpString}{c.RESET}")
+
+        xpDropdown = self.driver.find_element(By.ID, "filter-explvl")
+        xpDropdown.click()
+
+        dropdownContainer = self.driver.find_element(By.ID, "filter-explvl-menu")
+        dropdownOptions = dropdownContainer.find_elements(By.TAG_NAME, "li")
+
+        # Get available experience level categories
+        for i in range(4):
+            try:
+                option = dropdownOptions[i]
+                if option.text.startswith("No"):
+                    optionNoExperience = option
+                elif option.text.startswith("Entry"):
+                    optionEntryLevel = option
+                elif option.text.startswith("Mid"):
+                    optionMidLevel = option
+                elif option.text.startswith("Senior"):
+                    optionSeniorLevel = option
+                else:
+                    pass
+                print(f"\n{option.text}{c.GREEN} FOUND{c.RESET}")
+            except:
+                print(f"\nOption {i+1} {c.RED}NOT FOUND{c.RESET}")
+
+        # Click on specified experience if available
+        try:
+            if experience == 0:
+                optionNoExperience.click()
+            elif experience == 1:
+                optionEntryLevel.click()
+            elif experience == 2:
+                optionMidLevel.click()
+            elif experience == 3:
+                optionSeniorLevel.click()
+            else:
+                print(c.RED + "\nInvalid experience parameter" + c.RESET)
+        except:
+            print(c.RED + f"\nFailed to click {xpString} option" + c.RESET)
+
         time.sleep(wait)
 
     # Click search
@@ -161,6 +207,26 @@ class Driver:
             )
         time.sleep(wait)
 
+    def verifyHuman(self, wait):
+        print(f"\n{c.PURPLE}Checking for CAPTCHA{c.RESET}")
+        try:
+            time.sleep(wait)
+            WebDriverWait(self.driver, wait).until(
+                EC.frame_to_be_available_and_switch_to_it(
+                    (
+                        By.CSS_SELECTOR,
+                        "#challenge-stage",
+                    )
+                )
+            )
+            WebDriverWait(driver, wait).until(
+                EC.element_to_be_clickable(
+                    (By.CSS_SELECTOR, "#challenge-stage > div > label")
+                )
+            ).click()
+        except:
+            print(f"\n{c.GREEN}CAPTCHA not found{c.RESET}\n")
+
 
 # MAIN
 if __name__ == "__main__":
@@ -170,9 +236,10 @@ if __name__ == "__main__":
         driver.indeedEnterKeywords(keywords, wait)
         driver.indeedEnterLocation(location, wait)
         driver.indeedClickSearch(wait)
+        # driver.indeedFilterExperience(1, 5)
         indeedLinks = driver.indeedGetJobs(wait)
         driver.indeedFilterJobs(indeedLinks, wait)
 
     driver = Driver()
-    searchIndeed("java tester", "75081", 2)
+    searchIndeed("python developer", "75081", 2)
     driver.stayOpen(900, False)
