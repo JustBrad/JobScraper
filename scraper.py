@@ -289,7 +289,22 @@ class Driver:
         return urls
 
     def shGetJobInfo(self, links):
-        pass
+        print(f"\nFound {c.YELLOW}{len(links)} JOBS{c.RESET}\n")
+        for link in links:
+            self.navTo(link)
+            
+            # Print URL
+            print(c.UNDERLINE + c.DKGRAY + self.getUrl() + c.RESET)
+
+            # Get job title
+            try:
+                title = self.driver.find_element(By.CLASS_NAME, "chakra-heading css-yvgnf2")
+                print(c.YELLOW + title.text + c.RESET)
+            except:
+                print(c.RED + "No title provided" + c.RESET)
+
+
+
 
 # MAIN
 if __name__ == "__main__":
