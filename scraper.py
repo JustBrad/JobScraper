@@ -76,7 +76,13 @@ class Driver:
 
     # Scrolls down to bottom of page
     def scrollDown(self):
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        print(f"\nScrolling {c.YELLOW}DOWN{c.RESET}")
+        # self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        y = 500
+        for timer in range(0,5):
+            self.driver.execute_script("window.scrollTo(0, "+str(y)+")")
+            y += 500
+            time.sleep(1)
 
     ### --- INDEED --- ###
     
