@@ -282,15 +282,29 @@ class Driver:
         self.waitRandom()
         self.waitRandom()
 
-    def shGetJobs(self):
+    def shGetJobs(self, pages):
         urls = []
+        pagesToSearch = pages
 
-        self.scrollDown()
-        jobList = self.driver.find_element(By.ID, "job-list")
-        listElements = jobList.find_elements(By.TAG_NAME, "li")
-        for l in listElements:
-            aTag = l.find_element(By.TAG_NAME, "a")
-            urls.append(aTag.get_attribute("href"))
+        while pagesToSearch > 0:
+            self.scrollDown()
+            jobList = self.driver.find_element(By.ID, "job-list")
+            listElements = jobList.find_elements(By.TAG_NAME, "li")
+            for l in listElements:
+                aTag = l.find_element(By.TAG_NAME, "a")
+                urls.append(aTag.get_attribute("href"))
+
+            pagesToSearch -= 1
+            
+            # Look for next page button
+            if pagesToSearch > 0:
+                try:
+                    print(f"\nGoing to {c.YELLOW}NEXT PAGE{c.RESET}")
+                    nextPageButton = self.driver.find_element(By.CSS_SELECTOR, "#__next > div > main > div > div.css-17iqsqz > div > div > div.css-2jn6zr > div > div.css-15g2oxy > div.css-ukpd8g > nav > a.chakra-link.css-1puj5o8")
+                    nextPageButton.click()
+                    self.waitRandom()
+                except:
+                    print(f"\n{c.RED}No more pages{c.RESET}")
 
         return urls
 
@@ -341,16 +355,16 @@ if __name__ == "__main__":
         driver.indeedGetJobInfo(indeedJobLinks)
 
     # Search SimplyHired
-    def searchSimplyHired(keywords, location):
+    def searchSimplyHired(keywords, location, pages):
         driver.navTo("https://www.simplyhired.com/")
         driver.shEnterKeywords(keywords)
         driver.shEnterLocation(location)
         driver.shClickSearch()
-        shJobLinks = driver.shGetJobs()
+        shJobLinks = driver.shGetJobs(pages)
         driver.shGetJobInfo(shJobLinks)
 
         driver.stayOpen(900, False)
 
     driver = Driver()
     # searchIndeed("python entry level", "75081", 1)
-    searchSimplyHired("ups", "75081")
+    searchSimplyHired("ups", "75081", 1)
