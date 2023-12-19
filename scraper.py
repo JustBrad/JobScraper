@@ -78,6 +78,8 @@ class Driver:
     def scrollDown(self):
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
+    ### --- INDEED --- ###
+    
     # Enter keywords
     def indeedEnterKeywords(self, keywords):
         print(f"\nEntering keywords: {c.YELLOW}{keywords}{c.RESET}")
@@ -247,6 +249,47 @@ class Driver:
             )
         self.waitRandom()
 
+    ### --- SIMPLY HIRED --- ###
+        
+    def shEnterKeywords(self, keywords):
+        print(f"\nEntering keywords: {c.YELLOW}{keywords}{c.RESET}")
+        keywordBox = self.driver.find_element(By.ID, "field-:R3bakt9fbqm:")
+        keywordBox.send_keys(keywords)
+        self.waitRandom()
+
+    def shEnterLocation(self, location):
+        print(f"\nEntering location: {c.YELLOW}{location}{c.RESET}")
+        locationBox = self.driver.find_element(By.ID, "field-:R5bakt9fbqm:")
+        if platform.system() == "Darwin":
+            locationBox.send_keys(Keys.COMMAND + "a", Keys.BACKSPACE)
+        else:
+            locationBox.send_keys(Keys.CONTROL + "a", Keys.BACKSPACE)
+        locationBox.send_keys(location)
+        self.waitRandom()
+
+    def shClickSearch(self):
+        print(f"\nClicking {c.YELLOW}SEARCH{c.RESET}")
+        searchButton = self.driver.find_element(
+            By.CSS_SELECTOR, "#__next > main > div > div.css-imseer > form > div > div.css-nq12ob > div > div > button"
+        )
+        searchButton.click()
+        self.waitRandom()
+
+    def shGetJobs(self):
+        urls = []
+
+        self.scrollDown()
+        jobList = self.driver.find_element(By.ID, "job-list")
+        listElements = jobList.find_elements(By.TAG_NAME, "li")
+        for l in listElements:
+            aTag = l.find_element(By.TAG_NAME, "a")
+            urls.append(aTag.get_attribute("href"))
+
+        self.waitRandom()
+        return urls
+
+    def shGetJobInfo(self, links):
+        pass
 
 # MAIN
 if __name__ == "__main__":
@@ -256,9 +299,20 @@ if __name__ == "__main__":
         driver.indeedEnterKeywords(keywords)
         driver.indeedEnterLocation(location)
         driver.indeedClickSearch()
-        indeedLinks = driver.indeedGetJobs(pages)
-        driver.indeedGetJobInfo(indeedLinks)
+        indeedJobLinks = driver.indeedGetJobs(pages)
+        driver.indeedGetJobInfo(indeedJobLinks)
+
+    # Search SimplyHired
+    def searchSimplyHired(keywords, location):
+        driver.navTo("https://www.simplyhired.com/")
+        driver.shEnterKeywords(keywords)
+        driver.shEnterLocation(location)
+        driver.shClickSearch()
+        shJobLinks = driver.shGetJobs()
+        driver.shGetJobInfo(shJobLinks)
+
         driver.stayOpen(900, False)
 
     driver = Driver()
-    searchIndeed("python entry level", "75081", 1)
+    # searchIndeed("python entry level", "75081", 1)
+    searchSimplyHired("python entry level", "75081")
