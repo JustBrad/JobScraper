@@ -298,7 +298,7 @@ class Driver:
 
             # Get job title
             try:
-                title = self.driver.find_element(By.CLASS_NAME, "chakra-heading css-yvgnf2")
+                title = self.driver.find_element(By.CSS_SELECTOR, "#__next > div > main > div > div > aside > header > div > div > div.chakra-stack.css-1iblfv6 > h1")
                 print(c.YELLOW + title.text + c.RESET)
             except:
                 print(c.RED + "No title provided" + c.RESET)
