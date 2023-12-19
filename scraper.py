@@ -274,6 +274,7 @@ class Driver:
         )
         searchButton.click()
         self.waitRandom()
+        self.waitRandom()
 
     def shGetJobs(self):
         urls = []
@@ -285,7 +286,6 @@ class Driver:
             aTag = l.find_element(By.TAG_NAME, "a")
             urls.append(aTag.get_attribute("href"))
 
-        self.waitRandom()
         return urls
 
     def shGetJobInfo(self, links):
@@ -302,6 +302,23 @@ class Driver:
                 print(c.YELLOW + title.text + c.RESET)
             except:
                 print(c.RED + "No title provided" + c.RESET)
+
+            # Get job location
+            try:
+                location = self.driver.find_element(By.CSS_SELECTOR, "#__next > div > main > div > div > aside > header > div > div > div.css-1r85bh9 > div.chakra-stack.css-m3jj3s > span:nth-child(2) > span > span")
+                print(location.text)
+            except:
+                print(c.RED + "No location provided" + c.RESET)
+
+            # Get salary info
+            try:
+                time = self.driver.find_element(By.CSS_SELECTOR, "#__next > div > main > div > div > aside > div > div:nth-child(1) > div > div:nth-child(1) > div > span:nth-child(1) > span > span")
+                pay = self.driver.find_element(By.CSS_SELECTOR, "#__next > div > main > div > div > aside > div > div:nth-child(1) > div > div:nth-child(1) > div > span:nth-child(2) > span > span")
+                print(f"{c.GREEN}{time.text} | {pay.text}{c.RESET}")
+            except:
+                print(c.RED + "No salary provided" + c.RESET)
+
+
 
 
 
@@ -330,4 +347,4 @@ if __name__ == "__main__":
 
     driver = Driver()
     # searchIndeed("python entry level", "75081", 1)
-    searchSimplyHired("python entry level", "75081")
+    searchSimplyHired("ups", "75081")
