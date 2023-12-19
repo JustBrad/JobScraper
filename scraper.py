@@ -10,6 +10,7 @@ from ColorCodes import Colors as c
 import undetected_chromedriver as uc
 import keyboard
 import os
+import platform
 import time
 import random
 
@@ -18,14 +19,20 @@ import random
 class Driver:
     # Initialize
     def __init__(self):
-        PATH = "C:\chromedriver.exe"
-        OPTIONS = uc.ChromeOptions()
-        # OPTIONS.add_experimental_option("detach", True)
-        # OPTIONS.add_experimental_option("excludeSwitches", ["enable-automation"])
-        # OPTIONS.add_experimental_option("useAutomationExtension", False)
-        # OPTIONS.add_argument("--disable-blink-features=AutomationControlled")
-        self.driver = uc.Chrome(use_subprocess=True, options=OPTIONS)
-        print(f"+ \n--- Starting WebDriver with Selenium {selenium.__version__} ---")
+        if platform.system() == "Darwin":
+            PATH = r"\Users\bradegbert\chromedriver"
+            OPTIONS = webdriver.ChromeOptions()
+            OPTIONS.add_experimental_option("detach", True)
+            OPTIONS.add_experimental_option("excludeSwitches", ["enable-automation"])
+            OPTIONS.add_experimental_option("useAutomationExtension", False)
+            OPTIONS.add_argument("--disable-blink-features=AutomationControlled")
+            self.driver = webdriver.Chrome(options=OPTIONS)
+            print(f"+ \n--- Starting WebDriver with Selenium {selenium.__version__} on macOS---")
+        else:
+            PATH = "C:\chromedriver.exe"
+            OPTIONS = uc.ChromeOptions()
+            self.driver = uc.Chrome(use_subprocess=True, options=OPTIONS)
+            print(f"+ \n--- Starting WebDriver with Selenium {selenium.__version__} on Windows---")
 
     # Wait random number of seconds
     def waitRandom(self):
@@ -82,7 +89,10 @@ class Driver:
     def indeedEnterLocation(self, location):
         print(f"\nEntering location: {c.YELLOW}{location}{c.RESET}")
         locationBox = self.driver.find_element(By.ID, "text-input-where")
-        locationBox.send_keys(Keys.CONTROL + "a", Keys.BACKSPACE)
+        if platform.system() == "Darwin":
+            locationBox.send_keys(Keys.COMMAND + "a", Keys.BACKSPACE)
+        else:
+            locationBox.send_keys(Keys.CONTROL + "a", Keys.BACKSPACE)
         locationBox.send_keys(location)
         self.waitRandom()
 
