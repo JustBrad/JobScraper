@@ -13,12 +13,20 @@ import os
 import platform
 import time
 import random
+import pandas as pd
 
 
 # DRIVER
 class Driver:
     # Initialize
     def __init__(self):
+        self.TITLES = []
+        self.LOCATIONS = []
+        self.TYPES = []
+        self.PAYRATES = []
+        self.RATINGS = []
+        self.URLS = []
+
         if platform.system() == "Darwin":
             PATH = r"\Users\bradegbert\chromedriver"
             OPTIONS = webdriver.ChromeOptions()
@@ -27,16 +35,20 @@ class Driver:
             OPTIONS.add_experimental_option("useAutomationExtension", False)
             OPTIONS.add_argument("--disable-blink-features=AutomationControlled")
             self.driver = webdriver.Chrome(options=OPTIONS)
-            print(f"+ \n--- Starting WebDriver with Selenium {selenium.__version__} on macOS---")
+            print(
+                f"\n{c.PURPLE}--- Starting WebDriver with Selenium {selenium.__version__} on macOS---{c.RESET}"
+            )
         else:
             PATH = "C:\chromedriver.exe"
             OPTIONS = uc.ChromeOptions()
             self.driver = uc.Chrome(use_subprocess=True, options=OPTIONS)
-            print(f"+ \n--- Starting WebDriver with Selenium {selenium.__version__} on Windows---")
+            print(
+                f"\n{c.PURPLE}--- Starting WebDriver with Selenium {selenium.__version__} on Windows---{c.RESET}"
+            )
 
     # Wait random number of seconds
     def waitRandom(self):
-        sleep = random.randint(3, 10)
+        sleep = random.randint(2, 3)
         print(f"\n{c.BLUE}Waiting {sleep} seconds...{c.RESET}")
         time.sleep(sleep)
 
@@ -51,7 +63,6 @@ class Driver:
         print("\nClosing Webdriver...")
         self.driver.close()
         self.driver.quit()
-        quit()
 
     # Navigate to specified URL
     def navTo(self, url):
@@ -79,13 +90,13 @@ class Driver:
         print(f"\nScrolling {c.YELLOW}DOWN{c.RESET}")
         # self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         y = 500
-        for timer in range(0,5):
-            self.driver.execute_script("window.scrollTo(0, "+str(y)+")")
+        for timer in range(0, 5):
+            self.driver.execute_script("window.scrollTo(0, " + str(y) + ")")
             y += 500
             time.sleep(1)
 
     ### --- INDEED --- ###
-    
+
     # Enter keywords
     def indeedEnterKeywords(self, keywords):
         print(f"\nEntering keywords: {c.YELLOW}{keywords}{c.RESET}")
@@ -216,8 +227,10 @@ class Driver:
                     By.CLASS_NAME, "jobsearch-JobInfoHeader-title"
                 )
                 title = titleContainer.find_element(By.TAG_NAME, "span")
+                self.TITLES += title.text
                 print(c.YELLOW + title.text + c.RESET)
             except:
+                self.TITLES += "NONE"
                 print(c.RED + "No title provided" + c.RESET)
 
             # Get job location
@@ -226,8 +239,10 @@ class Driver:
                     By.XPATH,
                     '//*[@id="viewJobSSRRoot"]/div/div[2]/div/div/div[1]/div[2]/div[1]/div[2]/div/div/div/div[2]/div',
                 )
+                self.LOCATIONS += location.text
                 print(location.text)
             except:
+                self.LOCATIONS += "NONE"
                 print(c.RED + "No location provided" + c.RESET)
 
             # Get salary info
@@ -236,18 +251,23 @@ class Driver:
                 salaryInfo = salaryArea.find_elements(By.TAG_NAME, "span")
                 for info in salaryInfo:
                     if info.text[0] == "-":
+                        self.TYPES += info.text[2::]
                         print(c.GREEN + info.text[2::] + c.RESET)
                     else:
+                        self.PAYRATES += info.text
                         print(c.GREEN + info.text + c.RESET)
             except:
+                self.PAYRATES += "NONE"
                 print(c.RED + "No salary provided" + c.RESET)
 
             # Get job rating
             try:
                 jobRating = self.driver.find_element(By.ID, "companyRatings")
                 rating = jobRating.get_attribute("aria-label")
+                self.RATINGS += rating.text
                 print(rating)
             except:
+                self.RATINGS += "NONE"
                 print(c.RED + "No rating provided" + c.RESET)
 
             print(
@@ -256,7 +276,7 @@ class Driver:
         self.waitRandom()
 
     ### --- SIMPLY HIRED --- ###
-        
+
     def shEnterKeywords(self, keywords):
         print(f"\nEntering keywords: {c.YELLOW}{keywords}{c.RESET}")
         keywordBox = self.driver.find_element(By.ID, "field-:R3bakt9fbqm:")
@@ -276,7 +296,8 @@ class Driver:
     def shClickSearch(self):
         print(f"\nClicking {c.YELLOW}SEARCH{c.RESET}")
         searchButton = self.driver.find_element(
-            By.CSS_SELECTOR, "#__next > main > div > div.css-imseer > form > div > div.css-nq12ob > div > div > button"
+            By.CSS_SELECTOR,
+            "#__next > main > div > div.css-imseer > form > div > div.css-nq12ob > div > div > button",
         )
         searchButton.click()
         self.waitRandom()
@@ -295,12 +316,15 @@ class Driver:
                 urls.append(aTag.get_attribute("href"))
 
             pagesToSearch -= 1
-            
+
             # Look for next page button
             if pagesToSearch > 0:
                 try:
                     print(f"\nGoing to {c.YELLOW}NEXT PAGE{c.RESET}")
-                    nextPageButton = self.driver.find_element(By.CSS_SELECTOR, "#__next > div > main > div > div.css-17iqsqz > div > div > div.css-2jn6zr > div > div.css-15g2oxy > div.css-ukpd8g > nav > a.chakra-link.css-1puj5o8")
+                    nextPageButton = self.driver.find_element(
+                        By.CSS_SELECTOR,
+                        "#__next > div > main > div > div.css-17iqsqz > div > div > div.css-2jn6zr > div > div.css-15g2oxy > div.css-ukpd8g > nav > a.chakra-link.css-1puj5o8",
+                    )
                     nextPageButton.click()
                     self.waitRandom()
                 except:
@@ -312,35 +336,64 @@ class Driver:
         print(f"\nFound {c.YELLOW}{len(links)} JOBS{c.RESET}\n")
         for link in links:
             self.navTo(link)
-            
+
             # Print URL
             print(c.UNDERLINE + c.DKGRAY + self.getUrl() + c.RESET)
 
             # Get job title
             try:
-                title = self.driver.find_element(By.CSS_SELECTOR, "#__next > div > main > div > div > aside > header > div > div > div.chakra-stack.css-1iblfv6 > h1")
+                title = self.driver.find_element(
+                    By.XPATH,
+                    "/html/body/div[1]/div/main/div/div/aside/header/div/div/div[1]/h1",
+                )
+                self.TITLES.append(title.text)
                 print(c.YELLOW + title.text + c.RESET)
             except:
+                self.TITLES.append("NONE")
                 print(c.RED + "No title provided" + c.RESET)
 
             # Get job location
             try:
-                location = self.driver.find_element(By.CSS_SELECTOR, "#__next > div > main > div > div > aside > header > div > div > div.css-1r85bh9 > div.chakra-stack.css-m3jj3s > span:nth-child(2) > span > span")
+                location = self.driver.find_element(
+                    By.CSS_SELECTOR,
+                    "#__next > div > main > div > div > aside > header > div > div > div.css-1r85bh9 > div.chakra-stack.css-m3jj3s > span:nth-child(2) > span > span",
+                )
+                self.LOCATIONS.append(location.text)
                 print(location.text)
             except:
+                self.LOCATIONS.append("NONE")
                 print(c.RED + "No location provided" + c.RESET)
 
-            # Get salary info
+            # Get type info
             try:
-                time = self.driver.find_element(By.CSS_SELECTOR, "#__next > div > main > div > div > aside > div > div:nth-child(1) > div > div:nth-child(1) > div > span:nth-child(1) > span > span")
-                pay = self.driver.find_element(By.CSS_SELECTOR, "#__next > div > main > div > div > aside > div > div:nth-child(1) > div > div:nth-child(1) > div > span:nth-child(2) > span > span")
-                print(f"{c.GREEN}{time.text} | {pay.text}{c.RESET}")
+                type = self.driver.find_element(
+                    By.CSS_SELECTOR,
+                    "#__next > div > main > div > div > aside > div > div:nth-child(1) > div > div:nth-child(1) > div > span:nth-child(1) > span > span",
+                )
+                self.TYPES.append(type.text)
+                print(f"{c.GREEN}{type.text}{c.RESET}")
             except:
+                self.TYPES.append("NONE")
+                print(c.RED + "No type provided" + c.RESET)
+
+            # Get pay info
+            try:
+                pay = self.driver.find_element(
+                    By.CSS_SELECTOR,
+                    "#__next > div > main > div > div > aside > div > div:nth-child(1) > div > div:nth-child(1) > div > span:nth-child(2) > span > span",
+                )
+                self.PAYRATES.append(pay.text)
+                print(f"{c.GREEN}{pay.text}{c.RESET}")
+            except:
+                self.PAYRATES.append("NONE")
                 print(c.RED + "No salary provided" + c.RESET)
 
+            # Get rating
+            self.RATINGS.append("NONE")
 
-
-
+            print(
+                f"{c.DKGRAY}Jobs explored ({links.index(link) + 1}/{len(links)})\n{c.RESET}"
+            )
 
 
 # MAIN
@@ -352,6 +405,7 @@ if __name__ == "__main__":
         driver.indeedEnterLocation(location)
         driver.indeedClickSearch()
         indeedJobLinks = driver.indeedGetJobs(pages)
+        driver.URLS += indeedJobLinks
         driver.indeedGetJobInfo(indeedJobLinks)
 
     # Search SimplyHired
@@ -361,10 +415,34 @@ if __name__ == "__main__":
         driver.shEnterLocation(location)
         driver.shClickSearch()
         shJobLinks = driver.shGetJobs(pages)
+        driver.URLS += shJobLinks
         driver.shGetJobInfo(shJobLinks)
 
-        driver.stayOpen(900, False)
+        driver.stayOpen(3, False)
 
     driver = Driver()
     # searchIndeed("python entry level", "75081", 1)
     searchSimplyHired("ups", "75081", 1)
+
+    print(f"TITLES: {len(driver.TITLES)}")
+    print(f"LOCATIONS: {len(driver.LOCATIONS)}")
+    print(f"TYPES: {len(driver.TYPES)}")
+    print(f"PAYRATES: {len(driver.PAYRATES)}")
+    print(f"RATINGS: {len(driver.RATINGS)}")
+    print(f"URLS: {len(driver.URLS)}")
+
+    # Convert to CSV
+    data = {
+        "JOB TITLE": driver.TITLES,
+        "LOCATION": driver.LOCATIONS,
+        "DETAILS": driver.TYPES,
+        "DETAILS 2": driver.PAYRATES,
+        "RATING": driver.RATINGS,
+        "URL": driver.URLS,
+    }
+
+    df = pd.DataFrame(data)
+
+    df.to_csv("JobListings.csv", index=False)
+    print(f"\n{c.PURPLE}--- CSV GENERATED ---{c.RESET}")
+    quit()
