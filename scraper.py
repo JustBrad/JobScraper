@@ -36,14 +36,14 @@ class Driver:
             OPTIONS.add_argument("--disable-blink-features=AutomationControlled")
             self.driver = webdriver.Chrome(options=OPTIONS)
             print(
-                f"\n{c.PURPLE}--- Starting WebDriver with Selenium {selenium.__version__} on macOS---{c.RESET}"
+                f"\n{c.PURPLE}--- Starting WebDriver with Selenium {selenium.__version__} on macOS ---{c.RESET}"
             )
         else:
             PATH = "C:\chromedriver.exe"
             OPTIONS = uc.ChromeOptions()
             self.driver = uc.Chrome(use_subprocess=True, options=OPTIONS)
             print(
-                f"\n{c.PURPLE}--- Starting WebDriver with Selenium {selenium.__version__} on Windows---{c.RESET}"
+                f"\n{c.PURPLE}--- Starting WebDriver with Selenium {selenium.__version__} on Windows ---{c.RESET}"
             )
 
     # Wait random number of seconds
