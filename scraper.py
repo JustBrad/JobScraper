@@ -426,7 +426,6 @@ if __name__ == "__main__":
         driver.stayOpen(3, False)
 
     driver = Driver()
-    # searchIndeed("python entry level", "75081", 1)
     searchSimplyHired("ups", "75081", 1)
     exportCsv(driver)
     quit()
