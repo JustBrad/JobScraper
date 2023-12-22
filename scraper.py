@@ -24,7 +24,6 @@ class Driver:
         self.LOCATIONS = []
         self.TYPES = []
         self.PAYRATES = []
-        self.RATINGS = []
         self.URLS = []
 
         if platform.system() == "Darwin":
@@ -260,16 +259,6 @@ class Driver:
                 self.PAYRATES += "NONE"
                 print(c.RED + "No salary provided" + c.RESET)
 
-            # Get job rating
-            try:
-                jobRating = self.driver.find_element(By.ID, "companyRatings")
-                rating = jobRating.get_attribute("aria-label")
-                self.RATINGS += rating.text
-                print(rating)
-            except:
-                self.RATINGS += "NONE"
-                print(c.RED + "No rating provided" + c.RESET)
-
             print(
                 f"{c.DKGRAY}Jobs explored ({links.index(link) + 1}/{len(links)})\n{c.RESET}"
             )
@@ -388,9 +377,6 @@ class Driver:
                 self.PAYRATES.append("NONE")
                 print(c.RED + "No salary provided" + c.RESET)
 
-            # Get rating
-            self.RATINGS.append("NONE")
-
             print(
                 f"{c.DKGRAY}Jobs explored ({links.index(link) + 1}/{len(links)})\n{c.RESET}"
             )
@@ -398,6 +384,25 @@ class Driver:
 
 # MAIN
 if __name__ == "__main__":
+    # Export CSV
+    def exportCsv(driver):
+        print(f"TITLES: {len(driver.TITLES)}")
+        print(f"LOCATIONS: {len(driver.LOCATIONS)}")
+        print(f"TYPES: {len(driver.TYPES)}")
+        print(f"PAYRATES: {len(driver.PAYRATES)}")
+        print(f"URLS: {len(driver.URLS)}")
+        data = {
+            "JOB TITLE": driver.TITLES,
+            "LOCATION": driver.LOCATIONS,
+            "DETAILS": driver.TYPES,
+            "DETAILS 2": driver.PAYRATES,
+            "URL": driver.URLS,
+        }
+
+        df = pd.DataFrame(data)
+        df.to_csv("JobListings.csv", index=False)
+        print(f"\n{c.PURPLE}--- CSV GENERATED ---{c.RESET}")
+
     # Search Indeed
     def searchIndeed(keywords, location, pages):
         driver.navTo("https://www.indeed.com/")
@@ -423,26 +428,5 @@ if __name__ == "__main__":
     driver = Driver()
     # searchIndeed("python entry level", "75081", 1)
     searchSimplyHired("ups", "75081", 1)
-
-    print(f"TITLES: {len(driver.TITLES)}")
-    print(f"LOCATIONS: {len(driver.LOCATIONS)}")
-    print(f"TYPES: {len(driver.TYPES)}")
-    print(f"PAYRATES: {len(driver.PAYRATES)}")
-    print(f"RATINGS: {len(driver.RATINGS)}")
-    print(f"URLS: {len(driver.URLS)}")
-
-    # Convert to CSV
-    data = {
-        "JOB TITLE": driver.TITLES,
-        "LOCATION": driver.LOCATIONS,
-        "DETAILS": driver.TYPES,
-        "DETAILS 2": driver.PAYRATES,
-        "RATING": driver.RATINGS,
-        "URL": driver.URLS,
-    }
-
-    df = pd.DataFrame(data)
-
-    df.to_csv("JobListings.csv", index=False)
-    print(f"\n{c.PURPLE}--- CSV GENERATED ---{c.RESET}")
+    exportCsv(driver)
     quit()
